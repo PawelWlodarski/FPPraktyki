@@ -2,6 +2,8 @@ package com.idemia.praktyki.fp.paradigms
 
 import kotlin.random.Random
 
+
+//A.K.A DATABASE
 class RobotDataStructure(var energy:Int)
 
 var robot1 = RobotDataStructure( 100)
@@ -42,7 +44,7 @@ private fun hitRobot1(hitEnergy:Int):Int{
 
 private fun hitRobot2(hitEnergy:Int):Int{
     robot2.energy -= hitEnergy
-    return robot2.energy;
+    return robot2.energy
 }
 
 fun main() {
