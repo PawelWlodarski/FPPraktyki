@@ -39,8 +39,8 @@ fun worldOfMadness(){
 fun madnessMultiplied(){
 
     repeat(30){
-        val one = OOPNumber(1)
-        val oopNumbers=(1 .. 20).map { one }.toList()
+        val ONE = OOPNumber(1)
+        val oopNumbers=(1 .. 20).map { ONE }.toList()
         val result = oopNumbers
                 .parallelStream()
                 .reduce(OOPNumber::plus)
