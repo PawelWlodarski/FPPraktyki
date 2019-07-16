@@ -27,7 +27,7 @@ public class Part9EffectsAndFunctors {
         Function<Stream<Integer>, Stream<String>> liftedToStreams = liftStream(justAFunction);
         Stream<String> mappedStream = liftedToStreams.apply(list.stream());
 
-        //fpAsyncProgramExample(justAFunction);
+//        fpAsyncProgramExample(justAFunction);
 
         //ArrowKT
         //flatMap ??
@@ -78,7 +78,11 @@ public class Part9EffectsAndFunctors {
         Function<CompletableFuture<String>, CompletableFuture<String>> addPrefix = liftFuture(s -> "ASYNC "+s );
         Function<CompletableFuture<String>, CompletableFuture<Void>> edgeOfTheSystem = f -> f.thenAccept(sideEffectFunction);
 
-        //FPProgram - docencie ze napisałem to w tak gównianym języku jak java
+
+
+
+
+        //FPProgram on effects layer
         Function<Supplier<Integer>, CompletableFuture<Void>> fpAsyncProgram = unit
                         .andThen(businnesEffect1)
                         .andThen(businnesEffect2)
@@ -88,5 +92,15 @@ public class Part9EffectsAndFunctors {
         CompletableFuture<Void> terminationSignal = fpAsyncProgram.apply(generator);
 
         terminationSignal.get(); //await end
+
+
+        /**
+         * pure composition
+         */
+
+        justAFunction
+                .andThen(businessFunction)
+                .andThen(s -> "ASYNC "+s );
+//                .andThen(sideEffectFunction::accept); //problems with VOID and void
     }
 }
