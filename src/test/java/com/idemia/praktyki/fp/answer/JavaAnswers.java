@@ -1,11 +1,18 @@
-package com.idemia.praktyki.fp;
+package com.idemia.praktyki.fp.answer;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.idemia.praktyki.fp.answer.EffectsLibrary.map2;
 
 public class JavaAnswers {
 
@@ -91,6 +98,82 @@ public class JavaAnswers {
                 .fold(i -> "result : "+i, () -> "EMPTY");
     }
 
+    @Test
+    public void ex4FPvsExceptions(){
+
+        String result = Try.of(provideContent("file1"))
+                .recover(e -> Try.of(provideContent("file2")))
+                .flatMap(name -> Try.of(provideContent(name)))
+                .fold(c -> "result : "+c, Throwable::getMessage);
+
+        Assertions.assertThat(result).isEqualTo("result : final content");
+    }
+
+    private Supplier<String> provideContent(String fileName){
+            return  () -> {
+                //java...
+                try {
+                    return readFile(fileName);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+    }
+
+    //example with checked exception which destroys lambdas
+    private String readFile(String name) throws FileNotFoundException {
+        switch (name){
+            case "file2" :
+                return "anotherName";
+            case "anotherName" :
+                return "final content" ;
+            default:
+                throw new FileNotFoundException();
+        }
+    }
+
+
+    @Test
+    public void ex5Map2(){
+        Optional<Integer> optionalResult = map2(Optional.of(1), Optional.of(2), Integer::sum);
+
+        CompletableFuture<Integer> asyncResult1 = map2(
+                CompletableFuture.supplyAsync(() -> 1), CompletableFuture.completedFuture(2), Integer::sum
+        );
+
+        CompletableFuture<Integer> asyncResult2 =
+                map2(asyncResult1, CompletableFuture.supplyAsync(() -> 4), (i1,i2) -> i1*i2);
+
+        Assertions.assertThat(optionalResult).contains(3);
+        Assertions.assertThat(asyncResult2).isCompletedWithValue(12);
+    }
+
+    @Test
+    public void ex5FPBossSequence(){
+        List<Optional<Integer>> optionals = List.of(Optional.of(1), Optional.of(2), Optional.of(3));
+        List<Optional<Integer>> optionalsWithEmpty = List.of(Optional.of(1), Optional.empty(), Optional.of(3));
+
+        Optional<List<Integer>> result = EffectsLibrary.iterate(optionals);
+        Optional<List<Integer>> resultWithEmpty = EffectsLibrary.iterate(optionalsWithEmpty);
+
+        Assertions.assertThat(result).contains(List.of(1,2,3));
+        Assertions.assertThat(resultWithEmpty).isEmpty();
+    }
+
+
+    @Test
+    public void ex5FPBossTraverse() throws ExecutionException, InterruptedException {
+        List<CompletableFuture<String>> futures = List.of("aa", "bbb", "cccc").stream()
+                .map(i -> CompletableFuture.supplyAsync(() -> i))
+                .collect(Collectors.toList());
+
+        CompletableFuture<List<Integer>> result = EffectsLibrary.traverse(futures, String::length);
+
+
+        List<Integer> justAList = result.get();
+
+        Assertions.assertThat(justAList).isEqualTo(List.of(2,3,4)) ;
+    }
 }
 
 
@@ -129,68 +212,4 @@ class HighOrderFunctions{
         return (a,b) -> f.apply(a).apply(b);
     }
 
-}
-
-abstract class MyOptional<A>{
-
-    static <A> MyOptional<A> of(A value){
-        if(value!=null) return new Some(value);
-        else return None.INSTANCE;
-    }
-
-    static <A> MyOptional<A> empty(){
-        return  None.INSTANCE;
-    }
-
-    abstract <B> MyOptional<B> map(Function<A,B> f);
-    abstract <B> MyOptional<B> flatMap(Function<A,MyOptional<B>> f);
-    abstract <B> B fold(Function<A,B> forSome, Supplier<B> forNone);
-
-
-    static private class Some<A> extends MyOptional<A>{
-        private A value;
-
-        private Some(A value) {
-            this.value = value;
-        }
-
-        @Override
-        <B> MyOptional<B> map(Function<A, B> f) {
-            return new Some(f.apply(value));
-        }
-
-        @Override
-        <B> MyOptional<B> flatMap(Function<A, MyOptional<B>> f) {
-            return f.apply(value);
-        }
-
-        @Override
-        <B> B fold(Function<A, B> forSome, Supplier<B> forNone) {
-            return forSome.apply(value);
-        }
-    }
-
-    static private class None<A> extends MyOptional<A> {
-
-        private static None INSTANCE= new None();
-
-        private <B> None<B> none() {
-            return INSTANCE;
-        }
-
-        @Override
-        <B> MyOptional<B> map(Function<A, B> f) {
-            return none();
-        }
-
-        @Override
-        <B> MyOptional<B> flatMap(Function<A, MyOptional<B>> f) {
-            return none();
-        }
-
-        @Override
-        <B> B fold(Function<A, B> forSome, Supplier<B> forNone) {
-            return forNone.get();
-        }
-    }
 }
