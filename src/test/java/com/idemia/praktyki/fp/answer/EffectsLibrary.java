@@ -36,7 +36,7 @@ public final class EffectsLibrary {
         } ;
     }
 
-    static <A> Optional<List<A>> iterate(List<Optional<A>> input) {
+    static <A> Optional<List<A>> sequence(List<Optional<A>> input) {
             Optional<List<A>> result=Optional.of(new LinkedList<>());
 
             BiFunction<List<A>,A, List<A>> append = appendFunctionFactory();
@@ -64,7 +64,7 @@ public final class EffectsLibrary {
         return result;
     }
 
-    static <A> CompletableFuture<List<A>> sequence(List<CompletableFuture<A>> input){
+    static <A> CompletableFuture<List<A>> sequenceByTraverse(List<CompletableFuture<A>> input){
         return traverse(input,Function.identity());
     }
 

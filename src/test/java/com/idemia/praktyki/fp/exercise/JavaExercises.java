@@ -1,4 +1,4 @@
-package com.idemia.praktyki.fp.answer;
+package com.idemia.praktyki.fp.exercise;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -12,9 +12,11 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.idemia.praktyki.fp.answer.EffectsLibrary.map2;
+import static com.idemia.praktyki.fp.exercise.EffectsLibrary.map2;
 
-public class JavaAnswers {
+
+public class JavaExercises {
+
 
     @Test
     public void ex1functionalRobot(){
@@ -35,7 +37,7 @@ public class JavaAnswers {
 
     @Test
     public void ex2HighOrderFunctionsPartialApplication(){
-        BiFunction<Integer,Integer,Integer> add = (i,j) -> i+j;
+        BiFunction<Integer,Integer,Integer> add = (i, j) -> i+j;
         BiFunction<Integer,String,String> repeat = (howMany,content)
                 -> Stream.generate(() -> content)
                 .limit(howMany)
@@ -110,14 +112,14 @@ public class JavaAnswers {
     }
 
     private Supplier<String> provideContent(String fileName){
-            return  () -> {
-                //java...
-                try {
-                    return readFile(fileName);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            };
+        return  () -> {
+            //java...
+            try {
+                return readFile(fileName);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     //example with checked exception which destroys lambdas
@@ -185,16 +187,19 @@ class Robot{
         this.energy = energy;
     }
 
+    //EXERCISE
     static Robot buildRobot(int energy){
-        return new Robot(energy);
+        return null;
     }
 
+    //EXERCISE
     Robot modify(IntUnaryOperator f){
-        return  buildRobot(f.applyAsInt(energy));
+        return  null;
     }
 
+    //EXERCISE
     <A> A get(IntFunction<A> c){
-        return c.apply(energy);
+        return null;
     }
 }
 
